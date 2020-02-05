@@ -1,8 +1,9 @@
 clear all;close all;
 % señal muy similar a la analógica
+amp = 1;
 Ts = 1/1000;
 t = 0:Ts:1;
-x = cos(2*pi*t*10);
+x = amp*cos(2*pi*t*10);
 % señal con muestreo natural fs veces más lento (53Hz)
 fs = 19;
 tm = t(1:fs:end);
@@ -30,26 +31,28 @@ end
 xd = xs - xq;
 % graficas
 figure(1)
+%%
+subplot(2,2,3);
 plot(t,x)  %analog signal
+title('analog signal') 
 hold on
 stem(tm,xm,'r','filled') %natural sampling
-figure(2)
+%%
+subplot(2,2,1);
 plot(t,xs)  %sample and hold
-figure(3)
+title('sample and hold')
+%%
+subplot(2,2,2);
 plot(t,xq) %quantified
-figure(4)
+title('quantified')
+%%
+subplot(2,2,4);
 plot(t,xd) %difference
-% Calculate the Px of the signal for SNR
-Px = 0;
-for i=1:length(t)
-Px = ((1/fs)*(xs(i)^2)) + Px;
-end
-% Calculate the Pq of the signal for SNR
-Pq = 0;
-for i=1:length(t)
-Pq = ((xq(i)-xs(i))^2) + Pq;
-end
+title('difference')
 
-%Calculate the SNR
-SNR = Px/Pq
-SNRdb = 10*log10(SNR)
+%% Calculate the mean of the signal
+mean(xd)
+%if the result it is not ZERO we go by this method
+pot_xs = sum(xs.^2)/numel(xs)
+pot_xq = sum(xd.^2)/numel(xd)
+SNRdb = 10*log10(pot_xs/pot_xq)
