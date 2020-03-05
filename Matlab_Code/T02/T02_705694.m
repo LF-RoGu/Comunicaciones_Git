@@ -6,112 +6,208 @@ clear all;
 %%Code Starts Here
 %Audio Path
 audio_path = 'spring.wav';
-%Test Bench Config
-frameLength = 1024;
-%% BitsPerSample 4
-%Audio object for reading and audico file
-fileReader_per_sample_4 = dsp.AudioFileReader(audio_path,'SamplesPerFrame',frameLength);
-%Audio objecto for writing the audio device
-deviceWriter_per_sample_4 = audioDeviceWriter('SampleRate',fileReader_per_sample_4.SampleRate);
-%Object for Visualization
-scope_per_sample_4 = dsp.TimeScope('SampleRate',fileReader_per_sample_4.SampleRate,'TimeSpan',2,'BufferLength',fileReader_per_sample_4.SampleRate*2*2,'YLimits',[-1,1],'TimeSpanOverrunAction',"Scroll");
+[data, Fs] = audioread(audio_path);
+figure(1);
+title('SPECTROGRAM');
+%%
+% Quantification
+% With M = 2^(bits) we obtain the Quantification
+bits = 14;
+M = 2^bits;
 
-%Quantization process(Q)
-bits_per_sample_4 = 4;                 %Cantidad de bits
-swing_per_sample_4 = (2^bits_per_sample_4-1)/2;      %
+% Interval between the quantification levels
+levels = max(data) - min(data);
+levels = levels / M;
 
-%Audio Stream Loop
-while ~isDone(fileReader_per_sample_4)
-    signal_per_sample_4 = fileReader_per_sample_4();
-    xq_int_per_sample_4 = round(signal_per_sample_4*swing_per_sample_4+swing_per_sample_4);
-    
-    xq_per_sample_4 = (xq_int_per_sample_4-swing_per_sample_4)/swing_per_sample_4;
-    
-    scope_per_sample_4([signal_per_sample_4,xq_per_sample_4])
-    deviceWriter_per_sample_4(xq_per_sample_4);
+% Create a Vector
+step = levels;
+% According to the PP of PCM
+start = ( min(data) + (levels/2) );
+stop = ( max(data) + (levels/2) );
+
+PCM = ( start:step:stop );
+% Create a Vector of pure zeros of length of data
+xq_14bits = zeros(1,length(data));
+
+% Send the data to xq
+% For cycle to transmit the data to the vector xq
+for i = 1: length(data)
+    [temp, temp_Fs] = min( abs(data(i) - PCM ) );
+    xq_14bits(i) = PCM(temp_Fs);
 end
 
-release(fileReader_per_sample_4)
-release(deviceWriter_per_sample_4)
-release(scope_per_sample_4)
+audiowrite('14b_spring.wav', xq_14bits, Fs, 'BitsPerSample',16);
+[data_14bits, Fs] = audioread('14b_spring.wav');
 
-%% BitsPerSample 8
-%Audio object for reading and audico file
-fileReader_per_sample_8 = dsp.AudioFileReader(audio_path,'SamplesPerFrame',frameLength);
-%Audio objecto for writing the audio device
-deviceWriter_per_sample_8 = audioDeviceWriter('SampleRate',fileReader_per_sample_8.SampleRate);
-%Object for Visualization
-scope_per_sample_8 = dsp.TimeScope('SampleRate',fileReader_per_sample_8.SampleRate,'TimeSpan',2,'BufferLength',fileReader_per_sample_8.SampleRate*2*2,'YLimits',[-1,1],'TimeSpanOverrunAction',"Scroll");
+% REPRODUCE THE SOUND AND ESPECTOGRAM
+% Exercise 3
+subplot(4,1,1);
+spectrogram(data_14bits, 'yaxis');
+title('14 bits');
 
-%Quantization process(Q)
-bits_per_sample_8 = 8;                 %Cantidad de bits
-swing_per_sample_8 = (2^bits_per_sample_8-1)/2;      %
+%%
+% Quantification
+% With M = 2^(bits) we obtain the Quantification
+bits = 10;
+M = 2^bits;
 
-%Audio Stream Loop
-while ~isDone(fileReader_per_sample_8)
-    signal_per_sample_8 = fileReader_per_sample_8();
-    xq_int_per_sample_8 = round(signal_per_sample_8*swing_per_sample_8+swing_per_sample_8);
-    
-    xq_per_sample_8 = (xq_int_per_sample_8-swing_per_sample_8)/swing_per_sample_8;
-    
-    scope_per_sample_8([signal_per_sample_8,xq_per_sample_8])
-    deviceWriter_per_sample_8(xq_per_sample_8);
+% Interval between the quantification levels
+levels = max(data) - min(data);
+levels = levels / M;
+
+% Create a Vector
+step = levels;
+% According to the PP of PCM
+start = ( min(data) + (levels/2) );
+stop = ( max(data) + (levels/2) );
+
+PCM = ( start:step:stop );
+% Create a Vector of pure zeros of length of data
+xq_10bits = zeros(1,length(data));
+
+% Send the data to xq
+% For cycle to transmit the data to the vector xq
+for i = 1: length(data)
+    [temp, temp_Fs] = min( abs(data(i) - PCM ) );
+    xq_10bits(i) = PCM(temp_Fs);
 end
 
-release(fileReader_per_sample_8)
-release(deviceWriter_per_sample_8)
-release(scope_per_sample_8)
+audiowrite('10b_spring.wav', xq_10bits, Fs, 'BitsPerSample',16);
+[data_10bits, Fs] = audioread('10b_spring.wav');
 
-%% BitsPerSample 10
-%Audio object for reading and audico file
-fileReader_per_sample_10 = dsp.AudioFileReader(audio_path,'SamplesPerFrame',frameLength);
-%Audio objecto for writing the audio device
-deviceWriter_per_sample_10 = audioDeviceWriter('SampleRate',fileReader_per_sample_10.SampleRate);
-%Object for Visualization
-scope_per_sample_10 = dsp.TimeScope('SampleRate',fileReader_per_sample_10.SampleRate,'TimeSpan',2,'BufferLength',fileReader_per_sample_10.SampleRate*2*2,'YLimits',[-1,1],'TimeSpanOverrunAction',"Scroll");
+% REPRODUCE THE SOUND AND ESPECTOGRAM
+% Exercise 3
+subplot(4,1,2);
+spectrogram(data_10bits, 'yaxis');
+title('10 bits');
 
-%Quantization process(Q)
-bits_per_sample_10 = 10;                 %Cantidad de bits
-swing_per_sample_10 = (2^bits_per_sample_10-1)/2;      %
+%%
+% Quantification
+% With M = 2^(bits) we obtain the Quantification
+bits = 8;
+M = 2^bits;
 
-%Audio Stream Loop
-while ~isDone(fileReader_per_sample_10)
-    signal_per_sample_10 = fileReader_per_sample_10();
-    xq_int_per_sample_10 = round(signal_per_sample_10*swing_per_sample_10+swing_per_sample_10);
-    
-    xq_per_sample_10 = (xq_int_per_sample_10-swing_per_sample_10)/swing_per_sample_10;
-    
-    scope_per_sample_10([signal_per_sample_10,xq_per_sample_10])
-    deviceWriter_per_sample_10(xq_per_sample_10);
+% Interval between the quantification levels
+levels = max(data) - min(data);
+levels = levels / M;
+
+% Create a Vector
+step = levels;
+% According to the PP of PCM
+start = ( min(data) + (levels/2) );
+stop = ( max(data) + (levels/2) );
+
+PCM = ( start:step:stop );
+% Create a Vector of pure zeros of length of data
+xq_8bits = zeros(1,length(data));
+
+% Send the data to xq
+% For cycle to transmit the data to the vector xq
+for i = 1: length(data)
+    [temp, temp_Fs] = min( abs(data(i) - PCM ) );
+    xq_8bits(i) = PCM(temp_Fs);
 end
 
-release(fileReader_per_sample_10)
-release(deviceWriter_per_sample_10)
-release(scope_per_sample_10)
+audiowrite('8b_spring.wav', xq_8bits, Fs, 'BitsPerSample',16);
+[data_8bits, Fs] = audioread('8b_spring.wav');
 
-%% BitsPerSample 14
-%Audio object for reading and audico file
-fileReader_per_sample_14 = dsp.AudioFileReader(audio_path,'SamplesPerFrame',frameLength);
-%Audio objecto for writing the audio device
-deviceWriter_per_sample_14 = audioDeviceWriter('SampleRate',fileReader_per_sample_14.SampleRate);
-%Object for Visualization
-scope_per_sample_14 = dsp.TimeScope('SampleRate',fileReader_per_sample_14.SampleRate,'TimeSpan',2,'BufferLength',fileReader_per_sample_14.SampleRate*2*2,'YLimits',[-1,1],'TimeSpanOverrunAction',"Scroll");
+% REPRODUCE THE SOUND AND ESPECTOGRAM
+% Exercise 3
+subplot(4,1,3);
+spectrogram(data_8bits, 'yaxis');
+title('8 bits');
+%%
+% Quantification
+% With M = 2^(bits) we obtain the Quantification
+bits = 4;
+M = 2^bits;
 
-%Quantization process(Q)
-bits_per_sample_14 = 10;                 %Cantidad de bits
-swing_per_sample_14 = (2^bits_per_sample_14-1)/2;      %
+% Interval between the quantification levels
+levels = max(data) - min(data);
+levels = levels / M;
 
-%Audio Stream Loop
-while ~isDone(fileReader_per_sample_14)
-    signal_per_sample_14 = fileReader_per_sample_14();
-    xq_int_per_sample_14 = round(signal_per_sample_14*swing_per_sample_14+swing_per_sample_14);
-    
-    xq_per_sample_14 = (xq_int_per_sample_14-swing_per_sample_14)/swing_per_sample_14;
-    
-    scope_per_sample_14([signal_per_sample_14,xq_per_sample_14])
-    deviceWriter_per_sample_14(xq_per_sample_14);
+% Create a Vector
+step = levels;
+% According to the PP of PCM
+start = ( min(data) + (levels/2) );
+stop = ( max(data) + (levels/2) );
+
+PCM = ( start:step:stop );
+% Create a Vector of pure zeros of length of data
+xq_4bits = zeros(1,length(data));
+
+% Send the data to xq
+% For cycle to transmit the data to the vector xq
+for i = 1: length(data)
+    [temp, temp_Fs] = min( abs(data(i) - PCM ) );
+    xq_4bits(i) = PCM(temp_Fs);
 end
 
-release(fileReader_per_sample_14)
-release(deviceWriter_per_sample_14)
-release(scope_per_sample_14)
+audiowrite('4b_spring.wav', xq_4bits, Fs, 'BitsPerSample',16);
+[data_4bits, Fs] = audioread('4b_spring.wav');
+
+% REPRODUCE THE SOUND AND ESPECTOGRAM
+% Exercise 3
+subplot(4,1,4);
+spectrogram(data_4bits, 'yaxis');
+title('4 bits');
+
+%%
+% For this exercise it would be better to use the fir2 function
+% But for simplicity we use the lowpass filter function
+
+%Exercise 4
+fc_8k = 8000;
+fc_4k = 4000;
+fc_1k = 1000;
+
+figure(2);
+
+lowpass_8k = lowpass(data,fc_8k,Fs);
+audiowrite('lowpass_filter_8k.wav',lowpass_8k,Fs,'BitsPerSample',16);
+
+lowpass_4k = lowpass(data,fc_4k,Fs);
+audiowrite('lowpass_filter_4k.wav',lowpass_4k,Fs,'BitsPerSample',16);
+
+lowpass_1k = lowpass(data,fc_1k,Fs);
+audiowrite('lowpass_filter_1k.wav',lowpass_1k,Fs,'BitsPerSample',16);
+
+[lp_8k,Fs] = audioread('lowpass_filter_8k.wav');
+subplot(3,1,1);
+spectrogram(lp_8k, 'yaxis');
+title('8k Hz');
+
+
+[lp_4k,Fs] = audioread('lowpass_filter_4k.wav');
+subplot(3,1,2);
+spectrogram(lp_4k, 'yaxis');
+title('4k Hz');
+
+[lp_1k,Fs] = audioread('lowpass_filter_1k.wav');
+subplot(3,1,3);
+spectrogram(lp_1k, 'yaxis');
+title('1k Hz');
+
+%%
+% Part of the code to play the audio
+
+% Original Sound
+sound(data, Fs);
+
+% 14bits
+sound(xq_14bits, Fs);
+% 10bits
+sound(xq_10bits, Fs);
+% 8bits
+sound(xq_8bits, Fs);
+% 4bits
+sound(xq_4bits, Fs);
+
+% Filter Audio
+
+% 8k
+sound(lp_8k, Fs);
+% 4k
+sound(lp_4k, Fs);
+% 1k
+sound(lp_1k, Fs);
