@@ -20,9 +20,10 @@ figure;
 imshow(uint8(lenarec));
 title('Cutted Img');
 
-% Part 2
+%% Part 2
 
 b = de2bi(lenarec,8); %For Default it is the 'right-msb'
+%% 
 b = b'; %Transponse operation
 bits_rx = b(:); %Concatena el resto de bits, para que sea un solo vector
 

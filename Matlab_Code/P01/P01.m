@@ -1,6 +1,6 @@
 %sesion online 2
 %ejecucion de la practica 
-filename= 'organfinale.wav';
+filename= 'spring.wav';
 Fs_audio = 44100;
 sec = 10;
 samples = [1,sec*Fs_audio];
