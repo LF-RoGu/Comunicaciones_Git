@@ -15,8 +15,8 @@ payload_bits = payload_bits';
 payload_bits = payload_bits(:); 
 bits2Tx = [preamble_bits; header_bits; payload_bits]; 
 
-%% 
-Fs      =   48e3;              % Samples per second
+
+Fs      =   96e3;              % Samples per second
 Ts      =   1/Fs;              %  
 beta    =   0.5;               % Roll-off factor
 B       =   7200;              % Bandwidth available
@@ -59,3 +59,23 @@ EP = comm.EyeDiagram('SampleRate',Fs*mp,'SamplesPerSymbol',mp);
 EP(PSLC_Tx');
 %% 
 soundsc( [zeros(1,Fs/2) PSLC_Tx] )
+
+%% P02_PIII_705694
+
+t = .01; 
+Fc = 10e3; 
+t = [0:1/Fs:0.01]'; 
+s = sin(2*pi*300*t)+2*sin(2*pi*600*t); % Original signal 
+[num,den] = butter(10,Fc*2/Fs); % Lowpass filter (LPF) 
+sam = ammod(s,Fc,Fs); % Modulate. 
+s1 = amdemod(sam,Fc,Fs,0,0,num,den); % Demodulate. 
+% Observe las siguientes gráficas 
+plot(t,s); hold on 
+plot(t,sam)
+
+%% Pass-Band Modulation, AM-DSB- SC. 
+Fcarrier = 10e3;    % Carrier Frequency 
+% Fs must satisfy Fs >2*(Fc + BW),  
+samSC = ammod(PSLC_Tx,Fcarrier,Fs);
+
+plot(samSC(1:100));
